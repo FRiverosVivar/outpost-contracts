@@ -1,0 +1,189 @@
+{
+  "namespace": "com.friveros.newtech.schema",
+  "doc": "Contract entity",
+  "type": "record",
+  "name": "Contract",
+  "fields": [
+    {
+      "name": "id",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null
+    },
+    {
+      "name": "active",
+      "type": "boolean"
+    },
+    {
+      "name": "numberId",
+      "type": "long"
+    },
+    {
+      "name": "companyName",
+      "type": "string"
+    },
+    {
+      "name": "safi",
+      "type": "string"
+    },
+    {
+      "name": "contractName",
+      "type": "string"
+    },
+    {
+      "name": "startAt",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {
+      "name": "endAt",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {
+      "name": "createdAt",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    },
+    {
+      "name": "inspectingProsecutorId",
+      "type": "string"
+    },
+    {
+      "name": "residentId",
+      "type": "string"
+    },
+    {
+      "name": "assignedUsersId",
+      "type": {
+        "type": "array",
+        "items": "string"
+      }
+    },
+    {
+      "name": "galleryUri",
+      "type": {
+        "type": "array",
+        "items": "string"
+      }
+    },
+    {
+      "name": "locations",
+      "type" : {
+        "type": "array",
+        "items": {
+          "name": "Location",
+          "type": "record",
+          "fields": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "address",
+              "type": "string"
+            },
+            {
+              "name": "defaultAddress",
+              "type": "boolean"
+            },
+            {
+              "name": "point",
+              "type": "Point"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "clientId",
+      "type": "string"
+    },
+    {
+      "name": "deliveryClientId",
+      "type": "string"
+    },
+    {
+      "name": "resolutionName",
+      "type": "string"
+    },
+    {
+      "name": "budget",
+      "type": "long"
+    },
+    {
+      "name": "offer",
+      "type": "long"
+    },
+    {
+      "name": "modality",
+      "type": {
+        "type": "enum",
+        "name": "ModalityEnum",
+        "symbols": [
+          "READJUSTMENT_BY_IPC"
+        ]
+      }
+    },
+    {
+      "name": "baseIndex",
+      "type": "string"
+    },
+    {
+      "name": "reAdjustment",
+      "type": {
+        "type": "record",
+        "name": "ReAdjustment",
+        "fields": [
+          {
+            "name": "numericValue",
+            "type": "long"
+          },
+          {
+            "name": "decimals",
+            "type": "long"
+          },
+          {
+            "name": "currencyCode",
+            "type": {
+              "type": "enum",
+              "name": "CurrencyCodesEnum",
+              "symbols": [
+                "CLP",
+                "USD",
+                "MXN",
+                "PEN",
+                "COP",
+                "BRL",
+                "UF"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "status",
+      "type": {
+        "type": "enum",
+        "name": "ContractStatus",
+        "symbols": [
+          "CANCELED",
+          "ERASER",
+          "WAITING_DELIVERY_CLIENT",
+          "ACTIVE",
+          "WAITING_FINAL_SIGN",
+          "FINALIZED"
+        ]
+      }
+    }
+  ]
+}
