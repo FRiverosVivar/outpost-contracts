@@ -1,0 +1,72 @@
+version: "3"
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:19.0.0
+    container_name: keycloak
+    ports:
+      - "8443:8443"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: 8443
+      KC_HTTPS_PORT: 8443
+      KEYCLOAK_IMPORT: /etc/quarkus-realm.json
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_URL: http://localhost:8443/
+    volumes:
+      - ./config/keycloak.jks:/etc/keycloak.jks
+      - ./config/quarkus-realm.json:/opt/keycloak/data/import/quarkus-realm.json
+    command:
+      - start-dev
+      - --https-port=8443
+      - --https-key-store-file=/etc/keycloak.jks
+      - --https-key-store-password=secret
+      - --import-realm
+      - --log-level=INFO
+  rest-contracts:
+    image: rest-contracts:latest
+    container_name: rest-contracts
+    depends_on:
+      - keycloak
+    ports:
+      - "8086:8086"
+    environment:
+      - QUARKUS_OIDC_AUTH-SERVER-URL=https://keycloak:8443/realms/quarkus
+      - QUARKUS_OIDC_CLIENT-ID=backend-service
+      - QUARKUS_OIDC_CREDENTIALS_SECRET=secret
+      - QUARKUS_OIDC_ENABLED=true
+      - QUARKUS_HTTP_PORT=8086
+      - QUARKUS_OIDC_TLS_VERIFICATION=none
+      - QUARKUS_OIDC-CLIENT_AUTH-SERVER-URL=https://keycloak:8443/realms/quarkus
+      - QUARKUS_OIDC-CLIENT_CLIENT-ID=backend-service
+      - QUARKUS_OIDC-CLIENT_CREDENTIALS_CLIENT-SECRET_VALUE=secret
+      - QUARKUS_OIDC_INTROSPECTION-PATH=/protocol/openid-connect/token/introspect
+      - QUARKUS_HTTP_CORS=true
+      - QUARKUS_HTTP_CORS_ORIGINS=*
+      - QUARKUS_APPLICATION_NAME=rest-contracts
+      - QUARKUS_BANNER_PATH=banner.txt
+      - QUARKUS_REST_CLIENT_KEYCLOAK_URL=https://keycloak:8443/realms/quarkus
+      - QUARKUS_OIDC_APPLICATION_TYPE=service
+      - QUARKUS_OIDC_DISCOVERY_ENABLED=false
+      - QUARKUS_OIDC_INTROSPECTION_PATH=/protocol/openid-connect/token/introspect
+      - QUARKUS_OIDC_TOKEN_ISSUER=https://keycloak:8443/realms/quarkus
+      - QUARKUS_OIDC_CLIENT_AUTH_SERVER_URL=https://keycloak:8443/realms/quarkus
+      - QUARKUS_JACKSON_SERIALIZATION_INCLUSION=non-empty
+      - QUARKUS_HTTP_TEST_PORT=0
+      - QUARKUS_HTTP_CORS_EXPOSED_HEADERS=Authorization
+      - QUARKUS_LOG_CATEGORY_"io.quarkus.oidc"_LEVEL=DEBUG
+      - QUARKUS_LOG_CONSOLE_LEVEL=INFO
+      - QUARKUS_LIQUIBASE_MONGODB_MIGRATE_AT_START=true
+      - QUARKUS_MONGODB_DATABASE=contracts
+      - QUARKUS_MONGODB_CONNECTION-STRING=mongodb+srv://DEV-MNG-USR:F64nOftjVCcH3apN@be-qrks-contracts-dev.jxjffok.mongodb.net/?retryWrites=true&w=majority&appName=BE-QRKS-CONTRACTS-DEV
+      - QUARKUS_LIQUIBASE_MONGODB_CHANGE-LOG=db/changeLog.xml
+      - QUARKUS_LIQUIBASE_MONGODB_VALIDATE-ON-MIGRATE=true
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
