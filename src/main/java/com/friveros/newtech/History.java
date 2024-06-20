@@ -17,8 +17,8 @@ import java.util.Objects;
 @Tag( description = "history")
 @Schema(description = "history Schema for Pages")
 public class History extends ReactivePanacheMongoEntity {
-    public History(ObjectId pageId, Instant changedAt, String changedBy, String changedIdBy, List<ActionEnums> actions, Point point) {
-        this.pageId = pageId;
+    public History(String contractId, Instant changedAt, String changedBy, String changedIdBy, List<ActionEnums> actions, Point point) {
+        this.contractId = contractId;
         this.changedAt = changedAt;
         this.changedBy = changedBy;
         this.changedIdBy = changedIdBy;
@@ -27,7 +27,7 @@ public class History extends ReactivePanacheMongoEntity {
     }
 
     @NotNull
-    public ObjectId pageId;
+    public String contractId;
     @NotNull
     public Long numberId;
     @NotNull
@@ -59,7 +59,7 @@ public class History extends ReactivePanacheMongoEntity {
     @Override
     public String toString() {
         return "History {" +
-                "pageId='" + pageId + '\'' +
+                "pageId='" + contractId + '\'' +
                 ", changedAt=" + changedAt +
                 ", changedIdBy='" + changedIdBy + '\'' +
                 ", changedBy='" + changedBy + '\'' +

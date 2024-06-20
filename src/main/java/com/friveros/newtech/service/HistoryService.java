@@ -160,7 +160,7 @@ public class HistoryService {
         return actions;
     }
     private History createHistory(String contractId, String userName, String userId, List<ActionEnums> actions, Point point) {
-        History history = new History(new ObjectId(contractId), Instant.now(), userName, userId, actions, point);
+        History history = new History(contractId, Instant.now(), userName, userId, actions, point);
         LOGGER.info(history.toString());
         return history;
     }

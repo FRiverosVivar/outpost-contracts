@@ -5,11 +5,14 @@ import com.friveros.newtech.History;
 import com.friveros.newtech.dto.Point;
 import com.friveros.newtech.enums.ActionEnums;
 import com.friveros.newtech.mapper.ContractMapper;
+import io.quarkus.mongodb.panache.reactive.ReactivePanacheQuery;
+import io.quarkus.panache.common.Page;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import java.time.Instant;
@@ -17,6 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 @ApplicationScoped
 public class ContractService {
+    @ConfigProperty(name = "pagination.default-page")
+    int defaultPage;
+
+    @ConfigProperty(name = "pagination.default-size")
+    int defaultSize;
+
     private final ContractMapper contractMapper;
     private final HistoryService historyService;
     private final SequenceGeneratorService sequenceGeneratorService;
@@ -71,16 +80,39 @@ public class ContractService {
 
         return Contract.<Contract>findById(new ObjectId(id)).onFailure(Is404Exception.IS_404).recoverWithNull();
     }
-//    public Uni<List<Contract>> findPagesByBookId(String bookId, Boolean active) {
-//        return Contract.<Contract>find("bookId = ?1 and active = ?2", bookId, active).list().onFailure(Is404Exception.IS_404).recoverWithNull();
-//    }
-    public Uni<List<Contract>> findContractsByClientId(String clientId, Boolean active) {
-        return Contract.<Contract>find("clientId = ?1 and active = ?2", clientId, active).list().onFailure(Is404Exception.IS_404).recoverWithNull();
-    }
-    public Uni<List<Contract>> getAllActiveContracts() {
-        return Contract.<Contract>find("active", true).list().onFailure(Is404Exception.IS_404).recoverWithNull();
-    }
-    public Uni<List<Contract>> getAllContractc() {
-        return Contract.<Contract>findAll().list().onFailure(Is404Exception.IS_404).recoverWithNull();
+
+    public Uni<List<Contract>> getContracts(String page, String size, Boolean active, String clientId) {
+        List<Object> params = new ArrayList<>();
+        StringBuilder queryBuilder = new StringBuilder();
+
+        if (clientId != null) {
+            queryBuilder.append("clientId = ?1");
+            params.add(clientId);
+        }
+
+        if (active != null) {
+            if (!params.isEmpty()) {
+                queryBuilder.append(" and ");
+            }
+            queryBuilder.append("active = ?").append(params.size() + 1);
+            params.add(active);
+        }
+
+        String query = queryBuilder.toString();
+        ReactivePanacheQuery<Contract> panacheQuery;
+
+        if (query.isEmpty()) {
+            panacheQuery = Contract.findAll();
+        } else {
+            panacheQuery = Contract.find(query, params.toArray());
+        }
+
+        int pageNumber = (page != null) ? Integer.parseInt(page) : defaultPage;
+        int pageSize = (size != null) ? Integer.parseInt(size) : defaultSize;
+        panacheQuery.page(Page.of(pageNumber, pageSize));
+
+        return panacheQuery.list()
+                .onFailure(Is404Exception.IS_404)
+                .recoverWithNull();
     }
 }

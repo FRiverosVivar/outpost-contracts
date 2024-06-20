@@ -10,7 +10,7 @@
       "default": null
     },
     {
-      "name": "bookId",
+      "name": "contractId",
       "type": "string"
     },
     {

@@ -45,7 +45,7 @@ public class ContractResource {
         return this.contractService.persistContract(contractDTO.getContract(), contractDTO.getPoint());
     }
     @DELETE
-    @Path("")
+    @Path("/{id}")
     @NoCache
     @Operation(summary = "Removes a Contract")
     @APIResponse(
@@ -56,11 +56,11 @@ public class ContractResource {
                     schema = @Schema(implementation = Contract.class, type = OBJECT)
             )
     )
-    public Uni<Contract> removeContractByContractId(@QueryParam("id") String contractId) {
-        return this.contractService.removeContractById(contractId);
+    public Uni<Contract> removeContractByContractId(@PathParam("id") String id) {
+        return this.contractService.removeContractById(id);
     }
     @PUT
-    @Path("")
+    @Path("/{id}")
     @Operation(summary = "Updates a Contract")
     @APIResponse(
             responseCode = "200",
@@ -70,11 +70,11 @@ public class ContractResource {
                     schema = @Schema(implementation = Contract.class, type = OBJECT)
             )
     )
-    public Uni<Contract> updateContract(@Body @Valid ContractDTO contractDTO) {
+    public Uni<Contract> updateContract(@PathParam("id") String id, @Body @Valid ContractDTO contractDTO) {
         return this.contractService.updateContract(contractDTO.getContract(), contractDTO.getPoint());
     }
     @GET
-    @Path("")
+    @Path("/{id}")
     @NoCache
     @Operation(summary = "Find a contract by their ID")
     @APIResponse(
@@ -85,35 +85,35 @@ public class ContractResource {
                     schema = @Schema(implementation = Contract.class, type = OBJECT)
             )
     )
-    public Uni<Contract> findContractById(@QueryParam("id") String contractId) {
-        return this.contractService.findContractById(contractId);
+    public Uni<Contract> findContractById(@PathParam("id") String id) {
+        return this.contractService.findContractById(id);
     }
     @GET
-    @Path("/active")
+    @Path("")
     @Operation(summary = "Returns all Active Contracts")
     @APIResponse(
             responseCode = "200",
-            description = "Gets all Active Contracts, or empty list if none",
+            description = "Gets all Contracts, or empty list if none and can be filtered by active and clientId properties.",
             content = @Content(
                     mediaType = APPLICATION_JSON,
                     schema = @Schema(implementation = Contract.class, type = ARRAY)
             )
     )
-    public Uni<List<Contract>> getAllActiveContracts() {
-        return this.contractService.getAllActiveContracts();
+    public Uni<List<Contract>> getPaginatedContracts(@QueryParam("page") String page, @QueryParam("size") String size, @QueryParam("active") Boolean active, @QueryParam("clientId") String clientId) {
+        return this.contractService.getContracts(page, size, active, clientId);
     }
-    @GET
-    @Path("/client")
-    @Operation(summary = "Returns all the Contracts from a clientId")
-    @APIResponse(
-            responseCode = "200",
-            description = "Gets all Contracts from a clientId, or empty list if none",
-            content = @Content(
-                    mediaType = APPLICATION_JSON,
-                    schema = @Schema(implementation = Contract.class, type = ARRAY)
-            )
-    )
-    public Uni<List<Contract>> findContractsByClientId(@QueryParam("clientId") String clientId, @QueryParam("active") Boolean active) {
-        return this.contractService.findContractsByClientId(clientId,active != null);
-    }
+//    @GET
+//    @Path("/client")
+//    @Operation(summary = "Returns all the Contracts from a clientId")
+//    @APIResponse(
+//            responseCode = "200",
+//            description = "Gets all Contracts from a clientId, or empty list if none",
+//            content = @Content(
+//                    mediaType = APPLICATION_JSON,
+//                    schema = @Schema(implementation = Contract.class, type = ARRAY)
+//            )
+//    )
+//    public Uni<List<Contract>> findContractsByClientId(@QueryParam("clientId") String clientId, @QueryParam("active") Boolean active) {
+//        return this.contractService.findContractsByClientId(clientId,active != null);
+//    }
 }
